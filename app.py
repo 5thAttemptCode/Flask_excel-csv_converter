@@ -2,6 +2,7 @@ from flask import Flask, request, send_file, render_template
 from openpyxl import load_workbook
 import csv
 import io
+import os
 
 app = Flask(__name__)
 
@@ -23,6 +24,9 @@ def convert_excel_to_csv():
     if file.filename == '':
         return "No selected file"
     
+    # Extract the file name without extension
+    original_filename = os.path.splitext(file.filename)[0]
+
     # Load the uploaded Excel file
     wb = load_workbook(file)
     sheet = wb.active
@@ -36,12 +40,15 @@ def convert_excel_to_csv():
     
     output.seek(0)  # Go back to the start of the StringIO object
     
-    # Send the CSV file as an attachment
+    # Set the download file name as the original file name with .csv extension
+    csv_filename = f"{original_filename}.csv"
+    
+    # Send the CSV file as an attachment with the dynamic file name
     return send_file(
         io.BytesIO(output.getvalue().encode('utf-8')),
         mimetype='text/csv',
         as_attachment=True,
-        download_name='Payroll.csv'
+        download_name=csv_filename
     )
 
 if __name__ == '__main__':
