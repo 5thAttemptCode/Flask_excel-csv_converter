@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file, render_template
 from openpyxl import load_workbook
 import csv
-import os
+import io
 
 app = Flask(__name__)
 
@@ -27,19 +27,22 @@ def convert_excel_to_csv():
     wb = load_workbook(file)
     sheet = wb.active
 
-    # Prepare CSV data
-    csv_data = []
-    for value in sheet.iter_rows(values_only=True):
-        csv_data.append(list(value))
-
-    # Save CSV file in the current directory
-    csv_filename = 'Payroll.csv'
-    with open(csv_filename, 'w', newline="") as csv_obj:
-        writer = csv.writer(csv_obj)
-        writer.writerows(csv_data)
-
-    # Send the CSV file as a response
-    return send_file(csv_filename, as_attachment=True)
+    # Prepare CSV data in-memory using io.StringIO
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    for row in sheet.iter_rows(values_only=True):
+        writer.writerow(list(row))
+    
+    output.seek(0)  # Go back to the start of the StringIO object
+    
+    # Send the CSV file as an attachment
+    return send_file(
+        io.BytesIO(output.getvalue().encode('utf-8')),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name='Payroll.csv'
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
