@@ -69,12 +69,12 @@ body{
         gap: 1rem;
         border-radius: var(--borde-radius);
 
-        input:nth-child(1){
+        input{
             border-bottom: 2px solid var(--border-color-100);
             padding-bottom: 1rem;
         }
 
-        input:nth-child(2){
+        button{
             cursor: pointer;
             padding-block: 0.4rem;
             border: none;
